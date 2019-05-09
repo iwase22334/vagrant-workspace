@@ -9,15 +9,14 @@ Vagrant.configure("2") do |config|
     config.vm.provider "virtualbox" do |vb|
       vb.memory = "1024"
     end
-    config.ssh.forward_agent = true
 
-    config.vm.provision "shell", privileged: true, inline: <<-SCRIPT
+    config.vm.provision "shell", privileged: true, inline: <<-SHELL
       useradd -m -s /bin/bash -U iwase -u 666 --groups wheel
       mkdir -p /home/iwase/.ssh
       chown -R iwase:iwase /home/iwase
       echo "%iwase ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/iwase
-    SCRIPT
-    
+    SHELL
+
     config.vm.provision "shell" do |s|
       ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
       s.inline = <<-SHELL
@@ -28,15 +27,18 @@ Vagrant.configure("2") do |config|
       SHELL
     end
 
-    config.vm.provision "shell" do |s|
-      s.inline = <<-SHELL
-        sudo yum install -y ansible
-        sudo yum install -y git
-        git clone https://github.com/iwase22334/ansible-playbooks.git
-        chown -R vagrant ansible-playbooks
-      SHELL
-    end
+    config.ssh.forward_agent = true
 
-  end 
+    config.vm.provision "shell", privileged: true, inline: <<-SHELL
+      sudo yum install -y ansible
+      sudo yum install -y git
+    SHELL
+
+    config.vm.provision "shell", privileged: true, inline: <<-SHELL
+      git clone https://github.com/iwase22334/ansible-playbooks.git /home/iwase/ansible-playbooks
+      chown -R iwase /home/iwase/ansible-playbooks
+    SHELL
+
+  end
 
 end
