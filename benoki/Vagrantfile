@@ -4,7 +4,7 @@
 Vagrant.configure("2") do |config|
 
   config.vm.define "benoki" do |node|
-    config.vm.box = "centos/7"
+    config.vm.box = "bento/ubuntu-18.04"
     config.vm.network "public_network", ip: "192.168.50.3"
     config.vm.provider "virtualbox" do |vb|
       vb.memory = "1024"
@@ -30,8 +30,11 @@ Vagrant.configure("2") do |config|
     config.ssh.forward_agent = true
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
-      sudo yum install -y ansible
-      sudo yum install -y git
+      sudo apt-get update
+      sudo apt-get install software-properties-common
+      sudo apt-add-repository --yes --update ppa:ansible/ansible
+      sudo apt-get install ansible --yes
+      sudo apt-get install git --yes
     SHELL
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
