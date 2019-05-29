@@ -5,16 +5,18 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "benoki" do |node|
     config.vm.box = "bento/ubuntu-18.04"
-    config.vm.network "public_network", ip: "192.168.50.3"
+    config.vm.network "public_network", ip: "192.168.11.31"
     config.vm.provider "virtualbox" do |vb|
+      vb.customize ["modifyvm", :id, "--nictype1",  "virtio"]
+      vb.customize ["modifyvm", :id, "--nictype2",  "virtio"]
       vb.memory = "1024"
     end
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
-      useradd -m -s /bin/bash -U iwase -u 666 --groups wheel
+      useradd -m -s /bin/bash -U iwase -u 666
       mkdir -p /home/iwase/.ssh
       chown -R iwase:iwase /home/iwase
-      echo "%iwase ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/iwase
+      gpasswd -a iwase sudo
     SHELL
 
     config.vm.provision "shell" do |s|
@@ -24,6 +26,9 @@ Vagrant.configure("2") do |config|
         echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
         echo #{ssh_pub_key} >> /home/iwase/.ssh/authorized_keys
         echo #{ssh_pub_key} >> /root/.ssh/authorized_keys
+        chmod 0600 /home/vagrant/.ssh/authorized_keys
+        chmod 0600 /home/iwase/.ssh/authorized_keys
+        chmod 0600 /root/.ssh/authorized_keys
       SHELL
     end
 
@@ -31,7 +36,8 @@ Vagrant.configure("2") do |config|
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
       sudo apt-get update
-      sudo apt-get install software-properties-common
+      sudo apt-get install aptitude --yes
+      sudo apt-get install software-properties-common --yes
       sudo apt-add-repository --yes --update ppa:ansible/ansible
       sudo apt-get install ansible --yes
       sudo apt-get install git --yes

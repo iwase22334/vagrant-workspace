@@ -11,10 +11,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "tomato" do |node|
     config.vm.box = "centos/7"
-    #config.vm.network "public_network", ip: "192.168.50.2"
     config.vm.network "public_network", ip: "192.168.11.30"
-    #config.vm.network :forwarded_port, id: "ssh", guest: 22, host: 2220
-    #config.vm.network :forwarded_port, id: "docker", guest: 5432, host: 5432
 
     config.vm.provider "virtualbox" do |vb|
       #vb.customize ["modifyvm", :id, "--nictype1",  "virtio"]
@@ -42,6 +39,9 @@ Vagrant.configure("2") do |config|
       echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
       echo #{ssh_pub_key} >> /home/iwase/.ssh/authorized_keys
       echo #{ssh_pub_key} >> /root/.ssh/authorized_keys
+      chmod 0600 /home/vagrant/.ssh/authorized_keys
+      chmod 0600 /home/iwase/.ssh/authorized_keys
+      chmod 0600 /root/.ssh/authorized_keys
     SHELL
   end
 
